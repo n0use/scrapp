@@ -6,8 +6,9 @@ section="$1"
 [[ "$2" == "-r" ]] && related="yes"
 
 if [ -z "${section}" ] ; then
-    echo "Usage: $0 section"
+    echo "Usage: $0 section [-r]"
     echo ".. will scrape all the big images from specified section on wallpaperaccess.com"
+    echo ".. the optional -r argument at the end will scrape not only the category you specified but also wallpaper.com's list of 'related' categories"
     exit 1
 fi
 
