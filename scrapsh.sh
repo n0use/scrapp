@@ -2,6 +2,7 @@
 
 UA="Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1)"
 site="https://wallpaperaccess.com/"
+
 section="$1"
 [[ "$2" == "-r" ]] && related="yes"
 
@@ -17,39 +18,49 @@ fi
 grab_related()
 {
     local section="$1"
+    local _html="r-${RANDOM}.html"
+
+    echo "generating list of sections related to '$section'.."
 
     section="${section}#related"
-    echo wget  --user-agent="${UA}" -O index.html -S -nH "${site}/${section}"
-    wget  --user-agent="${UA}" -O index.html -S -nH "${site}/${section}"
-    gawk '/class="ui fluid image" href="\/[0-9A-Za-z\-_]*"/ { u = gensub(/^(.*)href="\/([0-9A-Za-z\-_]*)".*/, "\\2", "g"); print u; }' index.html | \
+    echo wget --user-agent="${UA}" -O index.html -S -nH "${site}/${section}"
+    wget --show-progress --quiet  --user-agent="${UA}" -O "${_html}" -S -nH "${site}/${section}"
+    gawk '/class="ui fluid image" href="\/[0-9A-Za-z\-_]*"/ { u = gensub(/^(.*)href="\/([0-9A-Za-z\-_]*)".*/, "\\2", "g"); print u; }' "${_html}"| \
     while read -r l ; do 
         _cwd=$(pwd)
-        mkdir "$l" && cd "$l"
-        echo grab_pic_urls "${l}" 
+        make_dir "${l}"
+        grab_pics "${l}" 
         cd "${_cwd}" 
     done
+    rm -f "${_html}"
 }
 
-grab_pic_urls()
+grab_pics()
 {
 
-    local collection=$1
-
-    wget  --user-agent="${UA}" -O index.html -S -nH "${site}/${section}"
-    grep -o '.full\/[0-9]*.jpg' index.html | sort -u | sed 's#^#https://wallpaperaccess.com#' | \
+    local section="$1"
+    local _html="p-${RANDOM}.html"
+    
+    echo "..scraping ${section}.."
+    wget --show-progress --quiet  --user-agent="${UA}" -O "${_html}" -S -nH "${site}/${section}"
+    grep -o '.full\/[0-9]*.jpg' "${_html}" | sort -u | sed 's#^#https://wallpaperaccess.com#' | \
     while read -r l ; do 
-        wget $l ; 
+        wget --show-progress --quiet --user-agent="${UA}" $l ; 
     done
+    rm -f "${_html}"
+}
+
+make_dir()
+{
+    mkdir "${1}" && cd "${1}" || { echo "fatal error creating/accessing directory $(pwd)/${1}.."; exit 2; }
 }
 
 
 if [ -z "${related}" ] ; then 
-    mkdir "${section}" 
-    cd "${section}"
-    grab_pic_urls "${section}"
+    make_dir "${section}" 
+    grab_pics "${section}"
 else
-    mkdir "${section}.related"
-    cd "${section}.related"
+    make_dir "${section}.related"
     grab_related "${section}"
 
 fi
