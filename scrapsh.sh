@@ -1,4 +1,7 @@
 #!/usr/local/bin/bash 
+#
+# wallpaperaccess.com image scraper
+# - jnn@cachedout.net
 
 UA="Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1)"
 site="https://wallpaperaccess.com/"
@@ -12,8 +15,6 @@ if [ -z "${section}" ] ; then
     echo ".. the optional -r argument at the end will scrape not only the category you specified but also wallpaper.com's list of 'related' categories"
     exit 1
 fi
-
-
 
 grab_related()
 {
@@ -64,10 +65,5 @@ else
     grab_related "${section}"
 
 fi
-
- #   || mkdir "${section}.${related}"
-
-
-
 
 # vim:ts=4:sts=4:ai:et:syntax=bash:ft=bash:
